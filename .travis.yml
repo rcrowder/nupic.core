@@ -38,11 +38,11 @@ deploy:
   local-dir: "$TRAVIS_BUILD_DIR/release"
   upload-dir: "numenta/nupic.core"
   skip_cleanup: true
-  # Deploying on master branch from linux/gcc and osx/clang
+  # Only deploy on master from clang build jobs
   on:
     branch: master
     condition:
-      - "($TRAVIS_OS_NAME == linux && $CC == gcc) || ($TRAVIS_OS_NAME == osx && $CC == clang)"
+      - "$CC == clang"
 
 notifications:
   irc:
