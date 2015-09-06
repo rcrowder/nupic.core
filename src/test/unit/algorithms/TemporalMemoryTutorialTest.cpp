@@ -226,15 +226,14 @@ void TemporalMemoryTutorialTest::init()
   patternMachine.initialize(6, vector<UInt>{ 1 }, 100, 42);
   _sequenceMachine = utils::SequenceMachine(patternMachine, 42);
 
-  cout << "Initialized new TM with parameters:" << endl;
-
-  _tm.printParameters();
-  cout << endl;
+  //cout << "Initialized new TM with parameters:" << endl;
+  //_tm.printParameters();
+  //cout << endl;
 }
 
 void TemporalMemoryTutorialTest::_feedTM(Sequence& sequence, int num, bool learn)
 {
-  _showInput(sequence, learn, num);
+  //_showInput(sequence, learn, num);
 
   TemporalMemoryAbstractTest::_feedTM(sequence, learn, num);
 }

@@ -59,7 +59,7 @@ vector<UInt> nupic::utils::range(int start, int stop, int step)
   else
   {
     x.resize(numEntries);
-    for (int j = 0, i = start; j < x.size(); i += step)
+    for (int j = 0, i = start; j < (int)x.size(); i += step)
       x[j++] = i;
   }
 
@@ -117,7 +117,7 @@ void PatternMachine::_generate()
     Int w = _getW();
 
     pattern.resize(w);
-    _Copy_n(candidates.begin(), w, pattern.begin());
+    copy_n(candidates.begin(), w, pattern.begin());
 
     _patterns[i] = pattern;
   }
