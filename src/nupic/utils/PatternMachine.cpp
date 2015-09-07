@@ -95,7 +95,7 @@ void PatternMachine::initialize(int n, vector<UInt>& w, int num, int seed)
 //  @return (set)Indices of on bits
 vector<UInt> PatternMachine::get(int number)
 {
-  if (number < 0 || number >= _patterns.size())
+  if (number < 0 || number >= (int)_patterns.size())
     throw runtime_error("Invalid index");
 
   return _patterns[number];
