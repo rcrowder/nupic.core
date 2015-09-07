@@ -103,7 +103,7 @@ namespace nupic {
 
     public:
 
-      SequenceMachine::SequenceMachine();
+      SequenceMachine();
       SequenceMachine(PatternMachine& patternMachine, int seed = 42);
 
       // @param numSequences(int)   Number of sequences to return, separated by None
