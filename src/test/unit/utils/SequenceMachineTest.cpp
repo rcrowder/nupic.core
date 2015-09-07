@@ -94,7 +94,8 @@ vector<UInt> SequenceMachineTest::get_pattern_union(vector<UInt>& p1, vector<UIn
 SequenceMachineTest::SequenceMachineTest()
 {
   _patternMachine = ConsecutivePatternMachine();
-  _patternMachine.initialize(100, vector<UInt>{ 5 });
+  vector<UInt> w = { 5 };
+  _patternMachine.initialize(100, w);
 
   _sequenceMachine = SequenceMachine(_patternMachine);
 
@@ -117,16 +118,25 @@ void SequenceMachineTest::testGenerateFromNumbers()
   Sequence sequence = _sequenceMachine.generateFromNumbers(numbers);
 
   NTA_CHECK(sequence.size() == 21);
-  NTA_CHECK(check_pattern_eq(sequence[0], _patternMachine.get(0)));
-  NTA_CHECK(check_pattern_eq(sequence[10], vector<UInt>{}));
-  NTA_CHECK(check_pattern_eq(sequence[11], _patternMachine.get(10)));
+  vector<UInt> seq1 = _patternMachine.get(0);
+  vector<UInt> s1 = sequence[0];
+  NTA_CHECK(check_pattern_eq(s1, seq1));
+
+  vector<UInt> reset = _patternMachine.get(0);
+  vector<UInt> s2 = sequence[10];
+  NTA_CHECK(check_pattern_eq(s2, reset));
+
+  vector<UInt> seq2 = _patternMachine.get(10);
+  vector<UInt> s3 = sequence[11];
+  NTA_CHECK(check_pattern_eq(s3, seq2));
 
 }
 
 void SequenceMachineTest::testAddSpatialNoise()
 {
   PatternMachine patternMachine;
-  patternMachine.initialize(10000, vector<UInt>{ 1000 });
+  vector<UInt> w = { 1000 };
+  patternMachine.initialize(10000, w);
 
   SequenceMachine sequenceMachine = SequenceMachine(patternMachine);
 
@@ -136,13 +146,17 @@ void SequenceMachineTest::testAddSpatialNoise()
   Sequence sequence = sequenceMachine.generateFromNumbers(numbers);
   Sequence noisy = sequenceMachine.addSpatialNoise(sequence, 0.5);
 
-  overlap = get_pattern_intersections(noisy[0], patternMachine.get(0));
+  vector<UInt> pattern = patternMachine.get(0);
+  vector<UInt> noise = noisy[0];
+  overlap = get_pattern_intersections(noise, pattern);
   NTA_CHECK((400 < overlap.size()) && (overlap.size() < 600));
 
   sequence = sequenceMachine.generateFromNumbers(numbers);
   noisy = sequenceMachine.addSpatialNoise(sequence, 0.0);
 
-  overlap = get_pattern_intersections(noisy[0], patternMachine.get(0));
+  pattern = patternMachine.get(0);
+  noise = noisy[0];
+  overlap = get_pattern_intersections(noise, pattern);
   NTA_CHECK((overlap.size() == 1000));
 
 }
@@ -151,7 +165,9 @@ void SequenceMachineTest::testGenerateNumbers()
 {
   Sequence numbers = _sequenceMachine.generateNumbers(1, 100);
   vector<UInt> p = range(0, 100);
-  NTA_CHECK(check_pattern_eq(numbers[0], p) == false);
+  vector<UInt> n = numbers[0];
+  NTA_CHECK(check_pattern_eq(n, p) == false);
+
   vector<UInt> v = numbers[0];
   sort(v.begin(), v.end());
   NTA_CHECK(check_pattern_eq(v, p));
@@ -180,7 +196,8 @@ void SequenceMachineTest::testGenerateNumbersMultipleSequences()
 
 void SequenceMachineTest::testGenerateNumbersWithShared()
 {
-  Sequence numbers = _sequenceMachine.generateNumbers(3, 100, { 20, 35 });
+  pair<int, int> sharedRange = { 20, 35 };
+  Sequence numbers = _sequenceMachine.generateNumbers(3, 100, sharedRange);
   vector<UInt> shared = range(300, 315);
 
   vector<UInt> v0 = numbers[0];
@@ -195,3 +212,4 @@ void SequenceMachineTest::testGenerateNumbersWithShared()
   vector<UInt> s2(v2.begin() + 20, v2.begin() + 35);
   NTA_CHECK(check_pattern_eq(s2, shared));
 }
+

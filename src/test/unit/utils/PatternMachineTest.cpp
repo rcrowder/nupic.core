@@ -38,7 +38,8 @@ using namespace nupic;
 void PatternMachineTest::RunTests()
 {
   _patternMachine = PatternMachine();
-  _patternMachine.initialize(10000, vector<UInt>{ 5 }, 50);
+  vector<UInt> w = { 5 };
+  _patternMachine.initialize(10000, w, 50);
 
   testRange();
   testGet();
@@ -164,7 +165,8 @@ void PatternMachineTest::testGetOutOfBounds()
 void PatternMachineTest::testAddNoise()
 {
   PatternMachine patternMachine = PatternMachine();
-  patternMachine.initialize(10000, vector<UInt>{ 1000 }, 1);
+  vector<UInt> w = { 1000 };
+  patternMachine.initialize(10000, w, 1);
 
   vector<UInt> diffs, noisy, pattern;
 
@@ -233,7 +235,8 @@ void PatternMachineTest::testWList()
 void PatternMachineTest::ConsecutivePatternMachineTest_setUp()
 {
   ConsecutivePatternMachine patternMachine = ConsecutivePatternMachine();
-  patternMachine.initialize(100, vector<UInt>{ 5 });
+  vector<UInt> w = { 5 };
+  patternMachine.initialize(100, w);
 
   _patternMachine = patternMachine;
 }
@@ -259,3 +262,4 @@ void PatternMachineTest::ConsecutivePatternMachineTest_testGetOutOfBounds()
 {
   EXPECT_THROW(_patternMachine.get(20), runtime_error);
 }
+
