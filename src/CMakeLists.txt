@@ -435,9 +435,7 @@ ADD_LIBRARY(${LIB_STATIC_NUPICCORE}
             nupic/types/Fraction.cpp
             nupic/utils/LoggingException.cpp
             nupic/utils/LogItem.cpp
-            nupic/utils/PatternMachine.cpp
             nupic/utils/Random.cpp
-            nupic/utils/SequenceMachine.cpp
             nupic/utils/StringUtils.cpp
             nupic/utils/TRandom.cpp
             nupic/utils/Watcher.cpp)
@@ -577,9 +575,7 @@ add_executable(${EXECUTABLE_GTESTS}
                test/unit/types/ExceptionTest.cpp
                test/unit/types/FractionTest.cpp
                test/unit/UnitTestMain.cpp
-               test/unit/utils/PatternMachineTest.cpp
                test/unit/utils/RandomTest.cpp
-               test/unit/utils/SequenceMachineTest.cpp
                test/unit/utils/WatcherTest.cpp)
 target_link_libraries(${EXECUTABLE_GTESTS}
                       ${COMMON_LIBS}
@@ -629,9 +625,7 @@ set(TEST_HEADERS
     test/unit/types/BasicTypeTest.hpp
     test/unit/types/ExceptionTest.hpp
     test/unit/types/FractionTest.hpp
-    test/unit/utils/PatternMachineTest.hpp
     test/unit/utils/RandomTest.hpp
-    test/unit/utils/SequenceMachineTest.hpp
     test/unit/utils/WatcherTest.hpp)
 set(tests_file_content "")
 set(headers_file_content "")
