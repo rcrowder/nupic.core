@@ -464,7 +464,9 @@ set(LIB_STATIC_NUPICCORE_SRCS
     nupic/types/Fraction.cpp
     nupic/utils/LoggingException.cpp
     nupic/utils/LogItem.cpp
+    nupic/utils/PatternMachine.cpp
     nupic/utils/Random.cpp
+    nupic/utils/SequenceMachine.cpp
     nupic/utils/StringUtils.cpp
     nupic/utils/TRandom.cpp
     nupic/utils/Watcher.cpp)
@@ -584,7 +586,10 @@ add_executable(${EXECUTABLE_GTESTS}
                test/unit/algorithms/FastCLAClassifierTest.cpp
                test/unit/algorithms/NearestNeighborUnitTest.cpp
                test/unit/algorithms/SpatialPoolerTest.cpp
+               test/unit/algorithms/TemporalMemoryAbstractTest.cpp
+               test/unit/algorithms/TemporalMemoryExtensiveTest.cpp
                test/unit/algorithms/TemporalMemoryTest.cpp
+               test/unit/algorithms/TemporalMemoryTutorialTest.cpp
                test/unit/engine/InputTest.cpp
                test/unit/engine/NetworkTest.cpp
                test/unit/engine/UniformLinkPolicyTest.cpp
@@ -619,7 +624,9 @@ add_executable(${EXECUTABLE_GTESTS}
                test/unit/types/ExceptionTest.cpp
                test/unit/types/FractionTest.cpp
                test/unit/UnitTestMain.cpp
+               test/unit/utils/PatternMachineTest.cpp
                test/unit/utils/RandomTest.cpp
+               test/unit/utils/SequenceMachineTest.cpp
                test/unit/utils/WatcherTest.cpp)
 target_link_libraries(${EXECUTABLE_GTESTS}
                       ${LIB_STATIC_GTEST}
@@ -633,7 +640,10 @@ set(TEST_HEADERS
     test/unit/algorithms/ConnectionsTest.hpp
     test/unit/algorithms/NearestNeighborUnitTest.hpp
     test/unit/algorithms/SpatialPoolerTest.hpp
+    test/unit/algorithms/TemporalMemoryAbstractTest.hpp
+    test/unit/algorithms/TemporalMemoryExtensiveTest.hpp
     test/unit/algorithms/TemporalMemoryTest.hpp
+    test/unit/algorithms/TemporalMemoryTutorialTest.hpp
     test/unit/engine/InputTest.hpp
     test/unit/engine/NetworkTest.hpp
     test/unit/engine/UniformLinkPolicyTest.hpp
@@ -665,7 +675,9 @@ set(TEST_HEADERS
     test/unit/types/BasicTypeTest.hpp
     test/unit/types/ExceptionTest.hpp
     test/unit/types/FractionTest.hpp
+    test/unit/utils/PatternMachineTest.hpp
     test/unit/utils/RandomTest.hpp
+    test/unit/utils/SequenceMachineTest.hpp
     test/unit/utils/WatcherTest.hpp)
 set(tests_file_content "")
 set(headers_file_content "")
