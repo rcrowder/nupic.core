@@ -115,22 +115,21 @@ void SequenceMachineTest::RunTests()
 
 void SequenceMachineTest::testGenerateFromNumbers()
 {
-  Sequence numbers({ range(0, 10), {}, range(10, 20) });
+  Sequence numbers({ range(0, 10), {}, range(10, 19) });
 
   Sequence sequence = _sequenceMachine.generateFromNumbers(numbers);
 
-  NTA_CHECK(sequence.size() == 21);
-  vector<UInt> seq1 = _patternMachine.get(0);
-  vector<UInt> s1 = sequence[0];
-  NTA_CHECK(check_pattern_eq(s1, seq1));
+  NTA_CHECK(sequence.size() == 20);
+  vector<UInt> s0 = sequence[0];
+  vector<UInt> seq0 = _patternMachine.get(0);
+  NTA_CHECK(check_pattern_eq(s0, seq0));
 
-  vector<UInt> reset = _patternMachine.get(0);
-  vector<UInt> s2 = sequence[10];
-  NTA_CHECK(check_pattern_eq(s2, reset));
+  vector<UInt> s10 = sequence[10];
+  NTA_CHECK(s10.size() == 0);
 
-  vector<UInt> seq2 = _patternMachine.get(10);
-  vector<UInt> s3 = sequence[11];
-  NTA_CHECK(check_pattern_eq(s3, seq2));
+  vector<UInt> seq10 = _patternMachine.get(10);
+  vector<UInt> s11 = sequence[11];
+  NTA_CHECK(check_pattern_eq(s11, seq10));
 
 }
 
@@ -186,12 +185,12 @@ void SequenceMachineTest::testGenerateNumbersMultipleSequences()
   NTA_CHECK(check_pattern_eq(v0, p));
 
   p = range(100, 200);
-  vector<UInt> v1 = numbers[1];
+  vector<UInt> v1 = numbers[2];
   sort(v1.begin(), v1.end());
   NTA_CHECK(check_pattern_eq(v1, p));
 
   p = range(200, 300);
-  vector<UInt> v2 = numbers[2];
+  vector<UInt> v2 = numbers[4];
   sort(v2.begin(), v2.end());
   NTA_CHECK(check_pattern_eq(v2, p));
 }
@@ -206,11 +205,11 @@ void SequenceMachineTest::testGenerateNumbersWithShared()
   vector<UInt> s0(v0.begin() + 20, v0.begin() + 35);
   NTA_CHECK(check_pattern_eq(s0, shared));
 
-  vector<UInt> v1 = numbers[1];
+  vector<UInt> v1 = numbers[2];
   vector<UInt> s1(v1.begin() + 20, v1.begin() + 35);
   NTA_CHECK(check_pattern_eq(s1, shared));
 
-  vector<UInt> v2 = numbers[2];
+  vector<UInt> v2 = numbers[4];
   vector<UInt> s2(v2.begin() + 20, v2.begin() + 35);
   NTA_CHECK(check_pattern_eq(s2, shared));
 }

@@ -45,7 +45,7 @@ void TemporalMemoryAbstractTest::setUp()
 
 void TemporalMemoryAbstractTest::init()
 {
-  _tm.initialize({ 100 }, 1, 11, 0.8, 0.7, 11, 11, 0.4, 0.0, 42);
+  _tm.initialize({ 100 }, 1, 11, 0.8, 0.7, 11, 11, 0.4, 0.0, 0.0, 42);
 }
 
 void TemporalMemoryAbstractTest::_feedTM(Sequence& sequence, bool learn, int num)

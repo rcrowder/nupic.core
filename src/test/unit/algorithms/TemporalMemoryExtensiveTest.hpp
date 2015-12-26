@@ -64,6 +64,7 @@ namespace nupic {
     void testH4();
     void testH5();
     void testH9();
+    void testH10();
 
     virtual void setUp();
     virtual void init();

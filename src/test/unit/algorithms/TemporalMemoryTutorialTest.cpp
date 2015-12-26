@@ -40,7 +40,7 @@ void TemporalMemoryTutorialTest::setUp()
 
 void TemporalMemoryTutorialTest::init()
 {
-  _tm.initialize({ 6 }, 4, 1, 0.3, 0.5, 1, 6, 0.1, 0.05, 42);
+  _tm.initialize({ 6 }, 4, 1, 0.3, 0.5, 1, 6, 0.1, 0.05, 0.0, 42);
 
   if (_verbosity > 0)
   {
@@ -174,7 +174,7 @@ void TemporalMemoryTutorialTest::testEndlesslyRepeating()
 {
   // Endlessly repeating sequence of 2 elements
   init();// { "columnDimensions": [2] });
-  _tm.initialize({ 2 }, 4, 1, 0.3, 0.5, 1, 6, 0.1, 0.05, 42);
+  _tm.initialize({ 2 }, 4, 1, 0.3, 0.5, 1, 6, 0.1, 0.05, 0.0, 42);
 
   Sequence numbers({ { 0, 1 } });
   Sequence sequence = _sequenceMachine.generateFromNumbers(numbers);
@@ -192,7 +192,7 @@ void TemporalMemoryTutorialTest::testEndlesslyRepeatingWithNoNewSynapses()
   init();// { "columnDimensions": [2],
   //          "maxNewSynapseCount" : 1,
   //          "cellsPerColumn" : 10 });
-  _tm.initialize({ 6 }, 10, 1, 0.3, 0.5, 1, 1, 0.1, 0.05, 42);
+  _tm.initialize({ 6 }, 10, 1, 0.3, 0.5, 1, 1, 0.1, 0.05, 0.0, 42);
 
   Sequence numbers({ { 0, 1 } });
   Sequence sequence = _sequenceMachine.generateFromNumbers(numbers);
@@ -208,7 +208,7 @@ void TemporalMemoryTutorialTest::testLongRepeatingWithNovelEnding()
   // Long repeating sequence with novel pattern at the end
   
   init();// { "columnDimensions": [3] });
-  _tm.initialize({ 3 }, 4, 1, 0.3, 0.5, 1, 6, 0.1, 0.05, 42);
+  _tm.initialize({ 3 }, 4, 1, 0.3, 0.5, 1, 6, 0.1, 0.05, 0.0, 42);
 
   Sequence numbers({ { 0, 1 } });
   Sequence sequence = _sequenceMachine.generateFromNumbers(numbers);
@@ -228,7 +228,7 @@ void TemporalMemoryTutorialTest::testSingleEndlesslyRepeating()
   // A single endlessly repeating pattern
   
   init();// { "columnDimensions": [1] });
-  _tm.initialize({ 1 }, 4, 1, 0.3, 0.5, 1, 6, 0.1, 0.05, 42);
+  _tm.initialize({ 1 }, 4, 1, 0.3, 0.5, 1, 6, 0.1, 0.05, 0.0, 42);
 
   Sequence sequence;
   sequence.data.push_back( patternMachine.get(0) );

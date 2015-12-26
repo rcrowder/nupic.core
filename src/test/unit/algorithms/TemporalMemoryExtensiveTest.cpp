@@ -51,14 +51,13 @@ void TemporalMemoryExtensiveTest::RunTests()
 {
   setUp();
 
-  _verbosity = 2;
+  _verbosity = 0;
  
   // NOTE: All of these tests together can take minutes to run
   bool runTests = false;
   if (runTests)
   {
     testB1();
-    testB11();
     testB3();
     testB4();
     testB5();
@@ -66,14 +65,15 @@ void TemporalMemoryExtensiveTest::RunTests()
     testB7();
     testB8();
     testB9();
+    testB11();
 
     testH1();
-    //testH10();
     testH2();
     testH3();
     testH4();
     testH5();
     testH9();
+    testH10();
   }
 }
 
@@ -281,7 +281,7 @@ void TemporalMemoryExtensiveTest::testB5()
   // First order sequences should still work just fine.
   
   init();// { "cellsPerColumn": 4 });
-  _tm.initialize({ 100 }, 4, 11, 0.8, 0.7, 11, 11, 0.4, 0.0, 42);
+  _tm.initialize({ 100 }, 4, 11, 0.8, 0.7, 11, 11, 0.4, 0.0, 0.0, 42);
 
   Sequence numbers = _sequenceMachine.generateNumbers(1, 100);
   Sequence sequence = _sequenceMachine.generateFromNumbers(numbers);
@@ -297,7 +297,7 @@ void TemporalMemoryExtensiveTest::testB6()
   // First order sequences should still work just fine."""
   
   init();// { "cellsPerColumn": 4 });
-  _tm.initialize({ 100 }, 4, 11, 0.8, 0.7, 11, 11, 0.4, 0.0, 42);
+  _tm.initialize({ 100 }, 4, 11, 0.8, 0.7, 11, 11, 0.4, 0.0, 0.0, 42);
 
   Sequence numbers = _sequenceMachine.generateNumbers(3, 100);
   Sequence sequence = _sequenceMachine.generateFromNumbers(numbers);
@@ -325,7 +325,7 @@ void TemporalMemoryExtensiveTest::testB7()
   init();// { "initialPermanence": 0.2,
   //          "connectedPermanence" : 0.7,
   //          "permanenceIncrement" : 0.2 });
-  _tm.initialize({ 100 }, 1, 11, 0.2, 0.7, 11, 11, 0.2, 0.0, 42);
+  _tm.initialize({ 100 }, 1, 11, 0.2, 0.7, 11, 11, 0.2, 0.0, 0.0, 42);
 
   Sequence numbers = _sequenceMachine.generateNumbers(1, 100);
   Sequence sequence = _sequenceMachine.generateFromNumbers(numbers);
@@ -346,7 +346,7 @@ void TemporalMemoryExtensiveTest::testB8()
   //          "connectedPermanence" : 0.7,
   //          "permanenceIncrement" : 0.2,
   //          "cellsPerColumn" : 4 });
-  _tm.initialize({ 100 }, 4, 11, 0.2, 0.7, 11, 11, 0.2, 0.0, 42);
+  _tm.initialize({ 100 }, 4, 11, 0.2, 0.7, 11, 11, 0.2, 0.0, 0.0, 42);
 
   Sequence numbers = _sequenceMachine.generateNumbers(1, 100);
   Sequence sequence = _sequenceMachine.generateFromNumbers(numbers);
@@ -366,7 +366,7 @@ void TemporalMemoryExtensiveTest::testB9()
   init();// { "initialPermanence": 0.2,
   //          "connectedPermanence" : 0.7,
   //          "permanenceIncrement" : 0.2 });
-  _tm.initialize({ 100 }, 1, 11, 0.2, 0.7, 11, 11, 0.2, 0.0, 42);
+  _tm.initialize({ 100 }, 1, 11, 0.2, 0.7, 11, 11, 0.2, 0.0, 0.0, 42);
 
   Sequence numbers = _sequenceMachine.generateNumbers(1, 100);
   Sequence sequence = _sequenceMachine.generateFromNumbers(numbers);
@@ -385,7 +385,7 @@ void TemporalMemoryExtensiveTest::testB11()
   
   init();// { "cellsPerColumn": 4,
   //          "activationThreshold" : 8 });
-  _tm.initialize({ 100 }, 4, 8, 0.8, 0.7, 11, 11, 0.4, 0.0, 42);
+  _tm.initialize({ 100 }, 4, 8, 0.8, 0.7, 11, 11, 0.4, 0.0, 0.0, 42);
 
   Sequence numbers = _sequenceMachine.generateNumbers(1, 100);
   Sequence sequence = _sequenceMachine.generateFromNumbers(numbers);
@@ -418,7 +418,7 @@ void TemporalMemoryExtensiveTest::testH2()
   // It should make just the right number of predictions.
   
   init();// { "cellsPerColumn": 4 });
-  _tm.initialize({ 100 }, 4, 11, 0.8, 0.7, 11, 11, 0.4, 0.0, 42);
+  _tm.initialize({ 100 }, 4, 11, 0.8, 0.7, 11, 11, 0.4, 0.0, 0.0, 42);
 
   Sequence numbers = _sequenceMachine.generateNumbers(2, 20, { 10, 15 });
   Sequence sequence = _sequenceMachine.generateFromNumbers(numbers);
@@ -439,7 +439,7 @@ void TemporalMemoryExtensiveTest::testH3()
   // prediction.
   
   init();// { "cellsPerColumn": 4 });
-  _tm.initialize({ 100 }, 4, 11, 0.8, 0.7, 11, 11, 0.4, 0.0, 42);
+  _tm.initialize({ 100 }, 4, 11, 0.8, 0.7, 11, 11, 0.4, 0.0, 0.0, 42);
 
   Sequence numbers = _sequenceMachine.generateNumbers(2, 20, { 0, 5 });
   Sequence sequence = _sequenceMachine.generateFromNumbers(numbers);
@@ -456,7 +456,7 @@ void TemporalMemoryExtensiveTest::testH4()
   // patterns (there is no shared subsequence).
   
   init();// { "cellsPerColumn": 4 });
-  _tm.initialize({ 100 }, 4, 11, 0.8, 0.7, 11, 11, 0.4, 0.0, 42);
+  _tm.initialize({ 100 }, 4, 11, 0.8, 0.7, 11, 11, 0.4, 0.0, 0.0, 42);
 
   Sequence numbers;
   numbers += _sequenceMachine.generateNumbers(1, 20);
@@ -477,7 +477,7 @@ void TemporalMemoryExtensiveTest::testH5()
   // Shared patterns in different sequences, with a shared subsequence.
   
   init();// { "cellsPerColumn": 4 });
-  _tm.initialize({ 100 }, 4, 11, 0.8, 0.7, 11, 11, 0.4, 0.0, 42);
+  _tm.initialize({ 100 }, 4, 11, 0.8, 0.7, 11, 11, 0.4, 0.0, 0.0, 42);
 
   Sequence numbers;
   Sequence shared = _sequenceMachine.generateNumbers(1, 5);// [:-1];
@@ -507,7 +507,7 @@ void TemporalMemoryExtensiveTest::testH9()
   
   init();// { "cellsPerColumn": 4,
   //          "activationThreshold" : 8 });
-  _tm.initialize({ 100 }, 4, 8, 0.8, 0.7, 11, 11, 0.4, 0.0, 42);
+  _tm.initialize({ 100 }, 4, 8, 0.8, 0.7, 11, 11, 0.4, 0.0, 0.0, 42);
 
   Sequence numbers = _sequenceMachine.generateNumbers(2, 20, { 10, 15 });
   Sequence sequence = _sequenceMachine.generateFromNumbers(numbers);
@@ -516,6 +516,43 @@ void TemporalMemoryExtensiveTest::testH9()
     _feedTM(sequence);
 
   sequence = _sequenceMachine.addSpatialNoise(sequence, 0.05);
+
+  _testTM(sequence);
+}
+
+void TemporalMemoryExtensiveTest::testH10()
+{
+  // Orphan Decay mechanism reduce predicted inactive cells (extra predictions).
+
+  // Test feeds in noisy sequences (X = 0.05) to TM with and without orphan decay.
+  // TM with orphan decay should has many fewer predicted inactive columns.
+  // Parameters the same as B11, and sequences like H9.
+
+  // train TM on noisy sequences with orphan decay turned off
+  init();// { "cellsPerColumn": 4,
+  //          "activationThreshold" : 8 });
+  _tm.initialize({ 100 }, 4, 8, 0.8, 0.7, 11, 11, 0.4, 0.0, 0.0, 42);
+
+  Sequence numbers = _sequenceMachine.generateNumbers(2, 20, { 10, 15 });
+  Sequence sequence = _sequenceMachine.generateFromNumbers(numbers);
+
+  std::vector<Sequence> sequenceNoisy; 
+  for (int i = 0; i < 10; i++)
+  {
+    sequenceNoisy.push_back(_sequenceMachine.addSpatialNoise(sequence, 0.05));
+    _feedTM(sequenceNoisy[i]);
+  }
+
+  _testTM(sequence);
+
+  // train TM on the same set of noisy sequences with orphan decay turned on
+  init();// { "cellsPerColumn": 4,
+  //          "activationThreshold" : 8,
+  //          "predictedSegmentDecrement": 0.04})
+  _tm.initialize({ 100 }, 4, 8, 0.8, 0.7, 11, 11, 0.4, 0.0, 0.04, 42);
+
+  for (int i = 0; i < 10; i++)
+    _feedTM(sequenceNoisy[i]);
 
   _testTM(sequence);
 }
