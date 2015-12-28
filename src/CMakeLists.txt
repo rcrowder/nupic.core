@@ -636,18 +636,6 @@ set_target_properties(${EXECUTABLE_GTESTS}
                                  LINK_FLAGS "${COMMON_LINK_FLAGS}")
 add_dependencies(${EXECUTABLE_GTESTS} ${LIB_STATIC_GTEST} ${COMMON_LIBS})
 set(TEST_HEADERS
-    test/unit/algorithms/CondProbTableTest.hpp
-    test/unit/algorithms/ConnectionsTest.hpp
-    test/unit/algorithms/NearestNeighborUnitTest.hpp
-    test/unit/algorithms/SpatialPoolerTest.hpp
-    test/unit/algorithms/TemporalMemoryAbstractTest.hpp
-    test/unit/algorithms/TemporalMemoryExtensiveTest.hpp
-    test/unit/algorithms/TemporalMemoryTest.hpp
-    test/unit/algorithms/TemporalMemoryTutorialTest.hpp
-    test/unit/engine/InputTest.hpp
-    test/unit/engine/NetworkTest.hpp
-    test/unit/engine/UniformLinkPolicyTest.hpp
-    test/unit/engine/YAMLUtilsTest.hpp
     test/unit/math/DenseTensorUnitTest.hpp
     test/unit/math/DomainUnitTest.hpp
     test/unit/math/IndexUnitTest.hpp
