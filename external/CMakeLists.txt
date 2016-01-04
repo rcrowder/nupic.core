@@ -47,7 +47,9 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 
 include(CapnProto)
 
-include(Swig)
+if(NOT DISABLE_PYTHON)
+  include(Swig)
+endif()
 
 # Convenience variable that wraps all external include directories.
 list(APPEND EXTERNAL_INCLUDE_DIRS ${CAPNP_INCLUDE_DIRS})

@@ -121,17 +121,22 @@ endif()
 
 add_definitions(${COMPILER_DEFINITIONS})
 
-#
-# Find Python Interp, min. v2.7
-# And NumPy core directory
-#
-find_package(PythonInterp 2.7 REQUIRED)
-execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c"
-                        "import numpy; import os; import sys; sys.stdout.write(os.path.dirname(numpy.get_include()))"
-                         OUTPUT_VARIABLE NUMPY_CORE)
 
-# Quick way to fixup directory paths to NumPy
-get_filename_component(NUMPY_CORE ${NUMPY_CORE}/include/.. ABSOLUTE)
+if(NOT DISABLE_PYTHON)
+  #
+  # Find Python Interp, min. v2.7
+  # And NumPy core directory
+  #
+  find_package(PythonInterp 2.7 REQUIRED)
+  execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c"
+                          "import numpy; import os; import sys; sys.stdout.write(os.path.dirname(numpy.get_include()))"
+                           OUTPUT_VARIABLE NUMPY_CORE)
+
+  # Quick way to fixup directory paths to NumPy
+  get_filename_component(NUMPY_CORE ${NUMPY_CORE}/include/.. ABSOLUTE)
+
+  set(NUMPY_CORE_INC_DIR ${NUMPY_CORE}/include)
+endif()
 
 #
 # Setup include paths
@@ -141,7 +146,7 @@ if("${PROJECT_BUILD_ARTIFACTS_DIR}" STREQUAL "")
 endif()
 
 include_directories(SYSTEM
-                    ${NUMPY_CORE}/include
+                    ${NUMPY_CORE_INC_DIR}
                     ${PROJECT_BINARY_DIR})
 
 include_directories(${PROJECT_SOURCE_DIR})
@@ -493,9 +498,14 @@ set(LIB_STATIC_NUPICCORE_LINK_LIBS
     ${COMMON_LIBS}
     ${COMMON_OS_LIBS})
 set(LIB_STATIC_NUPICCORE_COMPILE_FLAGS
-    "${COMMON_COMPILE_FLAGS} -I${NUMPY_CORE}/include")
+    "${COMMON_COMPILE_FLAGS}")
 set(LIB_STATIC_NUPICCORE_LINK_FLAGS
     "${COMMON_LINK_FLAGS} -static")
+
+if(NOT DISABLE_PYTHON)
+  set(LIB_STATIC_NUPICCORE_COMPILE_FLAGS
+      "${LIB_STATIC_NUPICCORE_COMPILE_FLAGS} -I${NUMPY_CORE}/include")
+endif()
 
 add_library(${LIB_STATIC_NUPICCORE} STATIC ${LIB_STATIC_NUPICCORE_SRCS})
 target_link_libraries(${LIB_STATIC_NUPICCORE}
@@ -930,10 +940,12 @@ install(DIRECTORY "${REPOSITORY_DIR}/external/common/include/"
         DESTINATION include)
 install(DIRECTORY "${REPOSITORY_DIR}/external/${PLATFORM}${BITNESS}${PLATFORM_SUFFIX}/include/"
         DESTINATION include)
-install(DIRECTORY "${NUMPY_CORE}/lib/"
-        DESTINATION lib)
-install(DIRECTORY "${NUMPY_CORE}/include/"
-        DESTINATION include)
+if(NOT DISABLE_PYTHON)
+  install(DIRECTORY "${NUMPY_CORE}/lib/"
+          DESTINATION lib)
+  install(DIRECTORY "${NUMPY_CORE}/include/"
+          DESTINATION include)
+endif()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   install(FILES ${CAPNP_LIBRARIES_LITE}
           DESTINATION lib)
