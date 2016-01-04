@@ -418,6 +418,8 @@ set(LIB_STATIC_NUPICCORE_SRCS
     nupic/algorithms/SpatialPooler.cpp
     nupic/algorithms/TemporalMemory.cpp
     nupic/algorithms/Svm.cpp
+    nupic/algorithms/monitor_mixin/Metric.cpp
+    nupic/algorithms/monitor_mixin/Trace.cpp
     nupic/engine/Collections.cpp
     nupic/engine/Input.cpp
     nupic/engine/Link.cpp
@@ -585,6 +587,8 @@ add_executable(${EXECUTABLE_GTESTS}
                test/unit/algorithms/NearestNeighborUnitTest.cpp
                test/unit/algorithms/SpatialPoolerTest.cpp
                test/unit/algorithms/TemporalMemoryTest.cpp
+               test/unit/algorithms/monitor_mixin/MetricTest.cpp
+               test/unit/algorithms/monitor_mixin/TraceTest.cpp
                test/unit/engine/InputTest.cpp
                test/unit/engine/NetworkTest.cpp
                test/unit/engine/UniformLinkPolicyTest.cpp
@@ -629,6 +633,8 @@ set_target_properties(${EXECUTABLE_GTESTS}
                                  LINK_FLAGS "${COMMON_LINK_FLAGS}")
 add_dependencies(${EXECUTABLE_GTESTS} ${LIB_STATIC_GTEST} ${COMMON_LIBS})
 set(TEST_HEADERS
+    test/unit/algorithms/monitor_mixin/MetricTest.hpp
+    test/unit/algorithms/monitor_mixin/TraceTest.hpp
     test/unit/math/DenseTensorUnitTest.hpp
     test/unit/math/DomainUnitTest.hpp
     test/unit/math/IndexUnitTest.hpp
