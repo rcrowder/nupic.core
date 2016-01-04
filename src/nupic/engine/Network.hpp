@@ -396,22 +396,24 @@ namespace nupic
      * @}
      */
 
-    /*
+#if !defined(NTA_DISABLE_PYTHON)
+     /*
      * Adds user built region to list of regions
      */
     static void registerPyRegion(const std::string module,
                                  const std::string className);
 
     /*
+    * Removes a region from RegionImplFactory's packages
+    */
+    static void unregisterPyRegion(const std::string className);
+#endif
+
+    /*
      * Adds a c++ region to the RegionImplFactory's packages
      */
     static void registerCPPRegion(const std::string name,
                                   GenericRegisteredRegionImpl* wrapper);
-
-    /*
-     * Removes a region from RegionImplFactory's packages
-     */
-    static void unregisterPyRegion(const std::string className);
 
     /*
      * Removes a c++ region from RegionImplFactory's packages

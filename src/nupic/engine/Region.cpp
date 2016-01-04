@@ -236,6 +236,7 @@ namespace nupic
     return factory.getSpec(nodeType);
   }
 
+#if !defined(NTA_DISABLE_PYTHON)
   void
   Region::registerPyRegion(const std::string module, const std::string className)
   {
@@ -243,15 +244,16 @@ namespace nupic
   }
 
   void
+    Region::unregisterPyRegion(const std::string className)
+  {
+    RegionImplFactory::unregisterPyRegion(className);
+  }
+#endif
+
+  void
   Region::registerCPPRegion(const std::string name, GenericRegisteredRegionImpl* wrapper)
   {
     RegionImplFactory::registerCPPRegion(name, wrapper);
-  }
-
-  void
-  Region::unregisterPyRegion(const std::string className)
-  {
-    RegionImplFactory::unregisterPyRegion(className);
   }
 
   void

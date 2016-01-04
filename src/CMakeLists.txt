@@ -59,6 +59,8 @@ else()
   message("Doing a local build")
 endif()
 
+option(DISABLE_PYTHON "Disable linking with Python." OFF)
+
 # Compiler `-D*` definitions
 set(COMPILER_DEFINITIONS
     -DNTA_OS_${PLATFORM_UPPERCASE}
@@ -81,8 +83,7 @@ elseif(MSVC OR MSYS OR MINGW)
       -DWIN32
       -D_WINDOWS
       -D_MBCS
-      -D_CRT_SECURE_NO_WARNINGS
-      -DNDEBUG
+      -D_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH
       -D_VARIADIC_MAX=10
       -DNOMINMAX
       -DCAPNP_LITE=1)
@@ -91,6 +92,12 @@ elseif(MSVC OR MSYS OR MINGW)
         ${COMPILER_DEFINITIONS}
         -DHAVE_UNISTD_H)
   endif()
+endif()
+
+if(DISABLE_PYTHON)
+  set(COMPILER_DEFINITIONS
+      ${COMPILER_DEFINITIONS}
+      -DNTA_DISABLE_PYTHON)
 endif()
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
@@ -301,12 +308,40 @@ add_library(${LIB_STATIC_Z} STATIC IMPORTED GLOBAL)
 #
 # Setup for python
 #
-find_package(PythonLibs REQUIRED)
-include_directories(SYSTEM ${PYTHON_INCLUDE_DIRS})
+if(NOT DISABLE_PYTHON)
+  find_package(PythonLibs REQUIRED)
 
-message(STATUS "PYTHON_EXECUTABLE   = ${PYTHON_EXECUTABLE}")
-message(STATUS "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
-message(STATUS "PYTHON_LIBRARIES    = ${PYTHON_LIBRARIES}")
+  #
+  # Python support
+  #
+  set (PY_SUPPORT_FILES
+       nupic/regions/PyRegion.cpp
+       nupic/py_support/NumpyVector.cpp
+       nupic/py_support/PyArray.cpp
+       nupic/py_support/PyHelpers.cpp
+       nupic/py_support/PythonStream.cpp
+       nupic/py_support/PyCapnp.cpp
+  )
+  if(NOT "${PLATFORM}" STREQUAL "windows")
+    list(APPEND PY_SUPPORT_FILES nupic/py_support/CapnpToPycapnp.cpp)
+  endif()
+
+  #
+  # Add the pycapnp Python package to includes
+  if(NOT "${PLATFORM}" STREQUAL "windows")
+    execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c"
+                            "import capnp; import os; import sys; sys.stdout.write(os.path.dirname(os.path.dirname(capnp.__file__)))"
+                    OUTPUT_VARIABLE PYCAPNP)
+    message(STATUS "PYCAPNP             = ${PYCAPNP}")
+    include_directories(SYSTEM ${PYCAPNP})
+  endif()
+
+  message(STATUS "PYTHON_EXECUTABLE   = ${PYTHON_EXECUTABLE}")
+  message(STATUS "PYTHON_INCLUDE_DIRS = ${PYTHON_INCLUDE_DIRS}")
+  message(STATUS "PYTHON_LIBRARIES    = ${PYTHON_LIBRARIES}")
+endif()
+
+include_directories(SYSTEM ${PYTHON_INCLUDE_DIRS})
 
 # List all .capnp files here. The C++ files will be generated and included
 # when compiling later on.
@@ -327,6 +362,11 @@ set(CAPNP_SPECS_REL
   nupic/proto/TestNodeProto.capnp
   nupic/proto/VectorFileSensorProto.capnp
 )
+if(NOT DISABLE_PYTHON)
+  set(CAPNP_SPECS_REL
+      ${CAPNP_SPECS_REL}
+      nupic/proto/PyRegionProto.capnp)
+endif()
 
 foreach(spec ${CAPNP_SPECS_REL})
   list(APPEND CAPNP_SPECS ${PROJECT_SOURCE_DIR}/${spec})
@@ -343,35 +383,12 @@ create_capnpc_command(capnp_specs
                       ${PROJECT_BINARY_DIR}
                       "${CAPNP_ALL}")
 
-#
-# Python support
-#
-set (PY_SUPPORT_FILES
-     nupic/py_support/NumpyVector.cpp
-     nupic/py_support/PyArray.cpp
-     nupic/py_support/PyHelpers.cpp
-     nupic/py_support/PythonStream.cpp
-     nupic/py_support/PyCapnp.cpp
-)
-if(NOT "${PLATFORM}" STREQUAL "windows")
-  list(APPEND PY_SUPPORT_FILES nupic/py_support/CapnpToPycapnp.cpp)
-endif()
-
 message(STATUS "CAPNP_EXECUTABLE   = ${CAPNP_EXECUTABLE}")
 message(STATUS "CAPNP_DEFINITIONS   = ${CAPNP_DEFINITIONS}")
 message(STATUS "CAPNP_INCLUDE_DIRS  = ${CAPNP_INCLUDE_DIRS}")
 message(STATUS "CAPNP_LIBRARIES     = ${CAPNP_LIBRARIES}")
 message(STATUS "CAPNP_LIBRARIES_LITE= ${CAPNP_LIBRARIES_LITE}")
 
-#
-# Add the pycapnp Python package to includes
-if(NOT "${PLATFORM}" STREQUAL "windows")
-  execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c"
-                          "import capnp; import os; import sys; sys.stdout.write(os.path.dirname(os.path.dirname(capnp.__file__)))"
-                  OUTPUT_VARIABLE PYCAPNP)
-  message(STATUS "PYCAPNP             = ${PYCAPNP}")
-  include_directories(SYSTEM ${PYCAPNP})
-endif()
 
 #
 # Setup libnupic_core
@@ -455,7 +472,6 @@ set(LIB_STATIC_NUPICCORE_SRCS
     nupic/os/Path.cpp
     nupic/os/Regex.cpp
     nupic/os/Timer.cpp
-    nupic/regions/PyRegion.cpp
     nupic/regions/VectorFile.cpp
     nupic/regions/VectorFileEffector.cpp
     nupic/regions/VectorFileSensor.cpp
@@ -505,21 +521,22 @@ add_custom_target(tests_cpp_region
                   DEPENDS ${EXECUTABLE_CPPREGIONTEST}
                   VERBATIM)
 
-#
-# Setup test_py_region
-#
-set(EXECUTABLE_PYREGIONTEST py_region_test)
-add_executable(${EXECUTABLE_PYREGIONTEST} test/integration/PyRegionTest.cpp)
-target_link_libraries(${EXECUTABLE_PYREGIONTEST} ${COMMON_LIBS})
-set_target_properties(${EXECUTABLE_PYREGIONTEST}
-                      PROPERTIES COMPILE_FLAGS ${COMMON_COMPILE_FLAGS})
-set_target_properties(${EXECUTABLE_PYREGIONTEST}
-                      PROPERTIES LINK_FLAGS "${COMMON_LINK_FLAGS}")
-add_custom_target(tests_py_region
-                  COMMAND ${EXECUTABLE_PYREGIONTEST}
-                  DEPENDS ${EXECUTABLE_PYREGIONTEST}
-                  VERBATIM)
-
+if(NOT DISABLE_PYTHON)
+  #
+  # Setup test_py_region
+  #
+  set(EXECUTABLE_PYREGIONTEST py_region_test)
+  add_executable(${EXECUTABLE_PYREGIONTEST} test/integration/PyRegionTest.cpp)
+  target_link_libraries(${EXECUTABLE_PYREGIONTEST} ${COMMON_LIBS})
+  set_target_properties(${EXECUTABLE_PYREGIONTEST}
+                        PROPERTIES COMPILE_FLAGS ${COMMON_COMPILE_FLAGS})
+  set_target_properties(${EXECUTABLE_PYREGIONTEST}
+                        PROPERTIES LINK_FLAGS "${COMMON_LINK_FLAGS}")
+  add_custom_target(tests_py_region
+                    COMMAND ${EXECUTABLE_PYREGIONTEST}
+                    DEPENDS ${EXECUTABLE_PYREGIONTEST}
+                    VERBATIM)
+endif()
 
 #
 # Setup test_connections_performance
@@ -578,49 +595,55 @@ add_dependencies(${EXECUTABLE_HELLOSPTP} ${COMMON_LIBS})
 # Setup gtests
 #
 set(EXECUTABLE_GTESTS unit_tests)
+set(EXECUTABLE_GTESTS_SRCS
+    test/unit/algorithms/CondProbTableTest.cpp
+    test/unit/algorithms/ConnectionsTest.cpp
+    test/unit/algorithms/FastCLAClassifierTest.cpp
+    test/unit/algorithms/NearestNeighborUnitTest.cpp
+    test/unit/algorithms/SpatialPoolerTest.cpp
+    test/unit/algorithms/TemporalMemoryTest.cpp
+    test/unit/engine/InputTest.cpp
+    test/unit/engine/NetworkTest.cpp
+    test/unit/engine/UniformLinkPolicyTest.cpp
+    test/unit/engine/YAMLUtilsTest.cpp
+    test/unit/math/DenseTensorUnitTest.cpp
+    test/unit/math/DomainUnitTest.cpp
+    test/unit/math/IndexUnitTest.cpp
+    test/unit/math/MathsTest.cpp
+    test/unit/math/SparseBinaryMatrixTest.cpp
+    test/unit/math/SparseMatrix01UnitTest.cpp
+    test/unit/math/SparseMatrixTest.cpp
+    test/unit/math/SparseMatrixUnitTest.cpp
+    test/unit/math/SparseTensorUnitTest.cpp
+    test/unit/ntypes/ArrayTest.cpp
+    test/unit/ntypes/BufferTest.cpp
+    test/unit/ntypes/CollectionTest.cpp
+    test/unit/ntypes/DimensionsTest.cpp
+    test/unit/ntypes/MemParserTest.cpp
+    test/unit/ntypes/MemStreamTest.cpp
+    test/unit/ntypes/NodeSetTest.cpp
+    test/unit/ntypes/ScalarTest.cpp
+    test/unit/ntypes/ValueTest.cpp
+    test/unit/os/DirectoryTest.cpp
+    test/unit/os/EnvTest.cpp
+    test/unit/os/OSTest.cpp
+    test/unit/os/PathTest.cpp
+    test/unit/os/RegexTest.cpp
+    test/unit/os/TimerTest.cpp
+    test/unit/test/TesterTest.cpp
+    test/unit/types/BasicTypeTest.cpp
+    test/unit/types/ExceptionTest.cpp
+    test/unit/types/FractionTest.cpp
+    test/unit/UnitTestMain.cpp
+    test/unit/utils/RandomTest.cpp
+    test/unit/utils/WatcherTest.cpp)
+if(NOT DISABLE_PYTHON)
+  set(EXECUTABLE_GTESTS_SRCS
+      ${EXECUTABLE_GTESTS_SRCS}
+      test/unit/py_support/PyHelpersTest.cpp)
+endif()
 add_executable(${EXECUTABLE_GTESTS}
-               test/unit/algorithms/CondProbTableTest.cpp
-               test/unit/algorithms/ConnectionsTest.cpp
-               test/unit/algorithms/FastCLAClassifierTest.cpp
-               test/unit/algorithms/NearestNeighborUnitTest.cpp
-               test/unit/algorithms/SpatialPoolerTest.cpp
-               test/unit/algorithms/TemporalMemoryTest.cpp
-               test/unit/engine/InputTest.cpp
-               test/unit/engine/NetworkTest.cpp
-               test/unit/engine/UniformLinkPolicyTest.cpp
-               test/unit/engine/YAMLUtilsTest.cpp
-               test/unit/math/DenseTensorUnitTest.cpp
-               test/unit/math/DomainUnitTest.cpp
-               test/unit/math/IndexUnitTest.cpp
-               test/unit/math/MathsTest.cpp
-               test/unit/math/SparseBinaryMatrixTest.cpp
-               test/unit/math/SparseMatrix01UnitTest.cpp
-               test/unit/math/SparseMatrixTest.cpp
-               test/unit/math/SparseMatrixUnitTest.cpp
-               test/unit/math/SparseTensorUnitTest.cpp
-               test/unit/ntypes/ArrayTest.cpp
-               test/unit/ntypes/BufferTest.cpp
-               test/unit/ntypes/CollectionTest.cpp
-               test/unit/ntypes/DimensionsTest.cpp
-               test/unit/ntypes/MemParserTest.cpp
-               test/unit/ntypes/MemStreamTest.cpp
-               test/unit/ntypes/NodeSetTest.cpp
-               test/unit/ntypes/ScalarTest.cpp
-               test/unit/ntypes/ValueTest.cpp
-               test/unit/os/DirectoryTest.cpp
-               test/unit/os/EnvTest.cpp
-               test/unit/os/OSTest.cpp
-               test/unit/os/PathTest.cpp
-               test/unit/os/RegexTest.cpp
-               test/unit/os/TimerTest.cpp
-               test/unit/py_support/PyHelpersTest.cpp
-               test/unit/test/TesterTest.cpp
-               test/unit/types/BasicTypeTest.cpp
-               test/unit/types/ExceptionTest.cpp
-               test/unit/types/FractionTest.cpp
-               test/unit/UnitTestMain.cpp
-               test/unit/utils/RandomTest.cpp
-               test/unit/utils/WatcherTest.cpp)
+               ${EXECUTABLE_GTESTS_SRCS})
 target_link_libraries(${EXECUTABLE_GTESTS}
                       ${LIB_STATIC_GTEST}
                       ${COMMON_LIBS})
@@ -651,13 +674,17 @@ set(TEST_HEADERS
     test/unit/os/PathTest.hpp
     test/unit/os/RegexTest.hpp
     test/unit/os/TimerTest.hpp
-    test/unit/py_support/PyHelpersTest.hpp
     test/unit/test/TesterTest.hpp
     test/unit/types/BasicTypeTest.hpp
     test/unit/types/ExceptionTest.hpp
     test/unit/types/FractionTest.hpp
     test/unit/utils/RandomTest.hpp
     test/unit/utils/WatcherTest.hpp)
+if(NOT DISABLE_PYTHON)
+  set(TEST_HEADERS
+      ${TEST_HEADERS}
+      test/unit/py_support/PyHelpersTest.hpp)
+endif()
 set(tests_file_content "")
 set(headers_file_content "")
 foreach(file ${TEST_HEADERS})
@@ -730,143 +757,144 @@ else()
                     VERBATIM)
 endif()
 
-#
-# Call SWIG to generate wrapper code for Python.
-#
-include(UseSWIG)
+if(NOT DISABLE_PYTHON)
+  #
+  # Call SWIG to generate wrapper code for Python.
+  #
+  include(UseSWIG)
 
-# Set the output location for the language modules that are created.
-set(CMAKE_SWIG_OUTDIR ${PROJECT_BINARY_DIR})
+  # Set the output location for the language modules that are created.
+  set(CMAKE_SWIG_OUTDIR ${PROJECT_BINARY_DIR})
 
-# Make sure the directory exists for the generated C++ files.
-file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/nupic/bindings)
+  # Make sure the directory exists for the generated C++ files.
+  file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/nupic/bindings)
 
-# SWIG options from:
-# https://github.com/swig/swig/blob/master/Source/Modules/python.cxx#L111
-set(SWIG_FLAGS
-    -features
-    autodoc=0,directors=0
-    -noproxyimport
-    -keyword
-    -modern
-    -modernargs
-    -noproxydel
-    -fvirtual
-    -fastunpack
-    -nofastproxy
-    -fastquery
-    -outputtuple
-    -castmode
-    -nosafecstrings
-    -w402
-    -w503
-    -w511
-    -w302
-    -w362
-    -w312
-    -w389
-    -DSWIG_PYTHON_LEGACY_BOOL
-    -I${SWIG_DIR}/python
-    -I${SWIG_DIR}
-    ${COMPILER_DEFINITIONS}
-)
+  # SWIG options from:
+  # https://github.com/swig/swig/blob/master/Source/Modules/python.cxx#L111
+  set(SWIG_FLAGS
+      -features
+      autodoc=0,directors=0
+      -noproxyimport
+      -keyword
+      -modern
+      -modernargs
+      -noproxydel
+      -fvirtual
+      -fastunpack
+      -nofastproxy
+      -fastquery
+      -outputtuple
+      -castmode
+      -nosafecstrings
+      -w402
+      -w503
+      -w511
+      -w302
+      -w362
+      -w312
+      -w389
+      -DSWIG_PYTHON_LEGACY_BOOL
+      -I${SWIG_DIR}/python
+      -I${SWIG_DIR}
+      ${COMPILER_DEFINITIONS}
+  )
 
-set(SWIG_SUPPORT_FILES
-    nupic/py_support/NumpyVector.cpp
-    nupic/py_support/PyArray.cpp
-    nupic/py_support/PyHelpers.cpp
-    nupic/py_support/PythonStream.cpp
-    nupic/bindings/PySparseTensor.cpp
-)
+  set(SWIG_SUPPORT_FILES
+      nupic/py_support/NumpyVector.cpp
+      nupic/py_support/PyArray.cpp
+      nupic/py_support/PyHelpers.cpp
+      nupic/py_support/PythonStream.cpp
+      nupic/bindings/PySparseTensor.cpp
+  )
 
-set(SWIG_LINK_LIBRARIES
-    ${PROJECT_BINARY_DIR}/libnupic_core.a
-    ${PYTHON_LIBRARIES}
-    ${COMMON_OS_LIBS})
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set(SWIG_LINK_LIBRARIES
-      ${SWIG_LINK_LIBRARIES}
-      ${CAPNP_LIBRARIES_LITE})
-else()
-  set(SWIG_LINK_LIBRARIES
-      ${SWIG_LINK_LIBRARIES}
-      ${CAPNP_LIBRARIES})
+      ${PROJECT_BINARY_DIR}/libnupic_core.a
+      ${PYTHON_LIBRARIES}
+      ${COMMON_OS_LIBS})
+
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    set(SWIG_LINK_LIBRARIES
+        ${SWIG_LINK_LIBRARIES}
+        ${CAPNP_LIBRARIES_LITE})
+  else()
+    set(SWIG_LINK_LIBRARIES
+        ${SWIG_LINK_LIBRARIES}
+        ${CAPNP_LIBRARIES})
+  endif()
+
+  # Algorithms
+  set(SWIG_ALGORITHMS_FILES nupic/bindings/algorithms.i)
+  set_source_files_properties(${SWIG_ALGORITHMS_FILES} PROPERTIES
+                              CPLUSPLUS ON
+                              SWIG_MODULE_NAME algorithms
+                              SWIG_FLAGS "${SWIG_FLAGS}")
+  set(SWIG_ALGORITHMS algorithms)
+  # Make sure we don't attempt to execute the swig executable until it is built.
+  set(SWIG_MODULE_${SWIG_ALGORITHMS}_EXTRA_DEPS Swig combined)
+  # Create custom command for generating files from SWIG.
+  swig_add_module(${SWIG_ALGORITHMS} python
+                  ${SWIG_SUPPORT_FILES}
+                  ${SWIG_ALGORITHMS_FILES})
+  list(APPEND SWIG_GENERATED_FILES ${swig_generated_file_fullname})
+  #TODO add_dependencies(${SWIG_MODULE_${SWIG_ALGORITHMS}_REAL_NAME}
+  swig_link_libraries(${SWIG_ALGORITHMS}
+                      ${SWIG_LINK_LIBRARIES})
+
+  # Engine
+  set(SWIG_ENGINE_FILES nupic/bindings/engine_internal.i)
+  set_source_files_properties(${SWIG_ENGINE_FILES} PROPERTIES
+                              CPLUSPLUS ON
+                              SWIG_MODULE_NAME engine_internal
+                              SWIG_FLAGS "${SWIG_FLAGS}")
+  set(SWIG_ENGINE engine_internal)
+  # Make sure we don't attempt to execute the swig executable until it is built.
+  set(SWIG_MODULE_${SWIG_ENGINE}_EXTRA_DEPS Swig combined)
+  # Create custom command for generating files from SWIG.
+  swig_add_module(${SWIG_ENGINE} python
+                  ${SWIG_SUPPORT_FILES}
+                  ${SWIG_ENGINE_FILES})
+  list(APPEND SWIG_GENERATED_FILES ${swig_generated_file_fullname})
+  swig_link_libraries(${SWIG_ENGINE}
+                      ${SWIG_LINK_LIBRARIES})
+
+  # Math
+  set(SWIG_MATH_FILES nupic/bindings/math.i)
+  set_source_files_properties(${SWIG_MATH_FILES} PROPERTIES
+                              CPLUSPLUS ON
+                              SWIG_MODULE_NAME math
+                              SWIG_FLAGS "${SWIG_FLAGS}")
+  set(SWIG_MATH math)
+  # Make sure we don't attempt to execute the swig executable until it is built.
+  set(SWIG_MODULE_${SWIG_MATH}_EXTRA_DEPS Swig combined)
+  # Create custom command for generating files from SWIG.
+  swig_add_module(${SWIG_MATH} python
+                  ${SWIG_SUPPORT_FILES}
+                  ${SWIG_MATH_FILES})
+  list(APPEND SWIG_GENERATED_FILES ${swig_generated_file_fullname})
+  swig_link_libraries(${SWIG_MATH}
+                      ${SWIG_LINK_LIBRARIES})
+
+  set_source_files_properties(${SWIG_GENERATED_FILES} PROPERTIES
+                              GENERATED TRUE)
+  set_source_files_properties(${SWIG_GENERATED_FILES} ${SWIG_SUPPORT_FILES}
+                              PROPERTIES
+                              COMPILE_FLAGS ${COMMON_COMPILE_FLAGS}
+                              LINK_FLAGS ${COMMON_LINK_FLAGS})
+
+  # If a path is specified, copy extensions files to proper location.
+  if (PY_EXTENSIONS_DIR)
+    install(TARGETS
+            ${SWIG_MODULE_${SWIG_ALGORITHMS}_REAL_NAME}
+            ${SWIG_MODULE_${SWIG_ENGINE}_REAL_NAME}
+            ${SWIG_MODULE_${SWIG_MATH}_REAL_NAME}
+            LIBRARY DESTINATION ${PY_EXTENSIONS_DIR})
+    install(FILES
+            ${PROJECT_BINARY_DIR}/algorithms.py
+            ${PROJECT_BINARY_DIR}/engine_internal.py
+            ${PROJECT_BINARY_DIR}/math.py
+            DESTINATION ${PY_EXTENSIONS_DIR})
+  endif(PY_EXTENSIONS_DIR)
 endif()
-
-# Algorithms
-set(SWIG_ALGORITHMS_FILES nupic/bindings/algorithms.i)
-set_source_files_properties(${SWIG_ALGORITHMS_FILES} PROPERTIES
-                            CPLUSPLUS ON
-                            SWIG_MODULE_NAME algorithms
-                            SWIG_FLAGS "${SWIG_FLAGS}")
-set(SWIG_ALGORITHMS algorithms)
-# Make sure we don't attempt to execute the swig executable until it is built.
-set(SWIG_MODULE_${SWIG_ALGORITHMS}_EXTRA_DEPS Swig combined)
-# Create custom command for generating files from SWIG.
-swig_add_module(${SWIG_ALGORITHMS} python
-                ${SWIG_SUPPORT_FILES}
-                ${SWIG_ALGORITHMS_FILES})
-list(APPEND SWIG_GENERATED_FILES ${swig_generated_file_fullname})
-#TODO add_dependencies(${SWIG_MODULE_${SWIG_ALGORITHMS}_REAL_NAME}
-swig_link_libraries(${SWIG_ALGORITHMS}
-                    ${SWIG_LINK_LIBRARIES})
-
-# Engine
-set(SWIG_ENGINE_FILES nupic/bindings/engine_internal.i)
-set_source_files_properties(${SWIG_ENGINE_FILES} PROPERTIES
-                            CPLUSPLUS ON
-                            SWIG_MODULE_NAME engine_internal
-                            SWIG_FLAGS "${SWIG_FLAGS}")
-set(SWIG_ENGINE engine_internal)
-# Make sure we don't attempt to execute the swig executable until it is built.
-set(SWIG_MODULE_${SWIG_ENGINE}_EXTRA_DEPS Swig combined)
-# Create custom command for generating files from SWIG.
-swig_add_module(${SWIG_ENGINE} python
-                ${SWIG_SUPPORT_FILES}
-                ${SWIG_ENGINE_FILES})
-list(APPEND SWIG_GENERATED_FILES ${swig_generated_file_fullname})
-swig_link_libraries(${SWIG_ENGINE}
-                    ${SWIG_LINK_LIBRARIES})
-
-# Math
-set(SWIG_MATH_FILES nupic/bindings/math.i)
-set_source_files_properties(${SWIG_MATH_FILES} PROPERTIES
-                            CPLUSPLUS ON
-                            SWIG_MODULE_NAME math
-                            SWIG_FLAGS "${SWIG_FLAGS}")
-set(SWIG_MATH math)
-# Make sure we don't attempt to execute the swig executable until it is built.
-set(SWIG_MODULE_${SWIG_MATH}_EXTRA_DEPS Swig combined)
-# Create custom command for generating files from SWIG.
-swig_add_module(${SWIG_MATH} python
-                ${SWIG_SUPPORT_FILES}
-                ${SWIG_MATH_FILES})
-list(APPEND SWIG_GENERATED_FILES ${swig_generated_file_fullname})
-swig_link_libraries(${SWIG_MATH}
-                    ${SWIG_LINK_LIBRARIES})
-
-set_source_files_properties(${SWIG_GENERATED_FILES} PROPERTIES
-                            GENERATED TRUE)
-set_source_files_properties(${SWIG_GENERATED_FILES} ${SWIG_SUPPORT_FILES}
-                            PROPERTIES
-                            COMPILE_FLAGS ${COMMON_COMPILE_FLAGS}
-                            LINK_FLAGS ${COMMON_LINK_FLAGS})
-
-# If a path is specified, copy extensions files to proper location.
-if (PY_EXTENSIONS_DIR)
-  install(TARGETS
-          ${SWIG_MODULE_${SWIG_ALGORITHMS}_REAL_NAME}
-          ${SWIG_MODULE_${SWIG_ENGINE}_REAL_NAME}
-          ${SWIG_MODULE_${SWIG_MATH}_REAL_NAME}
-          LIBRARY DESTINATION ${PY_EXTENSIONS_DIR})
-  install(FILES
-          ${PROJECT_BINARY_DIR}/algorithms.py
-          ${PROJECT_BINARY_DIR}/engine_internal.py
-          ${PROJECT_BINARY_DIR}/math.py
-          DESTINATION ${PY_EXTENSIONS_DIR})
-endif(PY_EXTENSIONS_DIR)
-
 
 #
 # Install targets into CMAKE_INSTALL_PREFIX

@@ -37,11 +37,14 @@
 #include <nupic/ntypes/BundleIO.hpp>
 #include <nupic/engine/YAMLUtils.hpp>
 #include <nupic/engine/TestNode.hpp>
-#include <nupic/regions/PyRegion.hpp>
 #include <nupic/regions/VectorFileEffector.hpp>
 #include <nupic/regions/VectorFileSensor.hpp>
 #include <nupic/utils/Log.hpp>
 #include <nupic/utils/StringUtils.hpp>
+
+#if !defined(NTA_DISABLE_PYTHON)
+#include <nupic/regions/PyRegion.hpp>
+#endif
 
 // from http://stackoverflow.com/a/9096509/1781435
 #define stringify(x)  #x
@@ -58,6 +61,7 @@ namespace nupic
   bool initializedRegions = false;
 
   // Allows the user to add custom regions
+#if !defined(NTA_DISABLE_PYTHON)
   void RegionImplFactory::registerPyRegion(const std::string module, const std::string className)
   {
     // Verify that no regions exist with the same className
@@ -80,17 +84,6 @@ namespace nupic
     pyRegions[module].insert(className);
   }
 
-  void RegionImplFactory::registerCPPRegion(const std::string name,
-                                            GenericRegisteredRegionImpl * wrapper)
-  {
-    if (cppRegions.find(name) != cppRegions.end())
-    {
-      NTA_WARN << "A CPPRegion already exists with the name '" 
-               << name << "'. Overwriting it...";
-    }
-    cppRegions[name] = wrapper;
-  }
-
   void RegionImplFactory::unregisterPyRegion(const std::string className)
   {
     for (auto pyRegion : pyRegions)
@@ -102,7 +95,19 @@ namespace nupic
       }
     }
     NTA_WARN << "A pyRegion with name '" << className <<
-    "' doesn't exist. Nothing to unregister...";
+      "' doesn't exist. Nothing to unregister...";
+  }
+#endif
+
+  void RegionImplFactory::registerCPPRegion(const std::string name,
+                                            GenericRegisteredRegionImpl * wrapper)
+  {
+    if (cppRegions.find(name) != cppRegions.end())
+    {
+      NTA_WARN << "A CPPRegion already exists with the name '"
+               << name << "'. Overwriting it...";
+    }
+    cppRegions[name] = wrapper;
   }
 
   void RegionImplFactory::unregisterCPPRegion(const std::string name)
@@ -114,6 +119,7 @@ namespace nupic
     }
   }
 
+#if !defined(NTA_DISABLE_PYTHON)
   class DynamicPythonLibrary
   {
     typedef void (*initPythonFunc)();
@@ -215,6 +221,7 @@ namespace nupic
     deserializePyNodeFunc deserializePyNode_;
     deserializePyNodeProtoFunc deserializePyNodeProto_;
   };
+#endif
 
 RegionImplFactory & RegionImplFactory::getInstance()
 {
@@ -234,6 +241,7 @@ RegionImplFactory & RegionImplFactory::getInstance()
   return instance;
 }
 
+#if !defined(NTA_DISABLE_PYTHON)
 // This function creates either a NuPIC 2 or NuPIC 1 Python node
 static RegionImpl * createPyNode(DynamicPythonLibrary * pyLib,
                                  const std::string & nodeType,
@@ -288,9 +296,6 @@ static RegionImpl * deserializePyNode(DynamicPythonLibrary * pyLib,
 
   NTA_THROW << "Unable to deserialize region " << region->getName() << " of type " << className;
   return nullptr;
-
-
-
 }
 
 static RegionImpl * deserializePyNode(DynamicPythonLibrary * pyLib,
@@ -321,6 +326,7 @@ static RegionImpl * deserializePyNode(DynamicPythonLibrary * pyLib,
             " of type " << className;
   return nullptr;
 }
+#endif
 
 RegionImpl* RegionImplFactory::createRegionImpl(const std::string nodeType,
                                                 const std::string nodeParams,
@@ -339,13 +345,16 @@ RegionImpl* RegionImplFactory::createRegionImpl(const std::string nodeType,
   {
     impl = cppRegions[nodeType]->createRegionImpl(vm, region);
   }
+#if !defined(NTA_DISABLE_PYTHON)
   else if ((nodeType.find(std::string("py.")) == 0))
   {
     if (!pyLib_)
       pyLib_ = boost::shared_ptr<DynamicPythonLibrary>(new DynamicPythonLibrary());
 
     impl = createPyNode(pyLib_.get(), nodeType, &vm, region);
-  } else
+  }
+#endif
+  else
   {
     NTA_THROW << "Unsupported node type '" << nodeType << "'";
   }
@@ -365,13 +374,16 @@ RegionImpl* RegionImplFactory::deserializeRegionImpl(const std::string nodeType,
   {
     impl = cppRegions[nodeType]->deserializeRegionImpl(bundle, region);
   }
+#if !defined(NTA_DISABLE_PYTHON)
   else if (StringUtils::startsWith(nodeType, "py."))
   {
     if (!pyLib_)
       pyLib_ = boost::shared_ptr<DynamicPythonLibrary>(new DynamicPythonLibrary());
 
     impl = deserializePyNode(pyLib_.get(), nodeType, bundle, region);
-  } else
+  }
+#endif
+  else
   {
     NTA_THROW << "Unsupported node type '" << nodeType << "'";
   }
@@ -390,6 +402,7 @@ RegionImpl* RegionImplFactory::deserializeRegionImpl(
   {
     impl = cppRegions[nodeType]->deserializeRegionImpl(proto, region);
   }
+#if !defined(NTA_DISABLE_PYTHON)
   else if (StringUtils::startsWith(nodeType, "py."))
   {
     if (!pyLib_)
@@ -397,6 +410,7 @@ RegionImpl* RegionImplFactory::deserializeRegionImpl(
 
     impl = deserializePyNode(pyLib_.get(), nodeType, proto, region);
   }
+#endif
   else
   {
     NTA_THROW << "Unsupported node type '" << nodeType << "'";
@@ -404,6 +418,7 @@ RegionImpl* RegionImplFactory::deserializeRegionImpl(
   return impl;
 }
 
+#if !defined(NTA_DISABLE_PYTHON)
 // This function returns the node spec of a NuPIC 2 or NuPIC 1 Python node
 static Spec * getPySpec(DynamicPythonLibrary * pyLib,
                                 const std::string & nodeType)
@@ -428,6 +443,7 @@ static Spec * getPySpec(DynamicPythonLibrary * pyLib,
 
   NTA_THROW << "Matching Python module for " << className << " not found.";
 }
+#endif
 
 Spec * RegionImplFactory::getSpec(const std::string nodeType)
 {
@@ -444,6 +460,7 @@ Spec * RegionImplFactory::getSpec(const std::string nodeType)
   {
     ns = cppRegions[nodeType]->createSpec();
   }
+#if !defined(NTA_DISABLE_PYTHON)
   else if (nodeType.find(std::string("py.")) == 0)
   {
     if (!pyLib_)
@@ -451,6 +468,7 @@ Spec * RegionImplFactory::getSpec(const std::string nodeType)
 
     ns = getPySpec(pyLib_.get(), nodeType);
   }
+#endif
   else
   {
     NTA_THROW << "getSpec() -- Unsupported node type '" << nodeType << "'";
@@ -471,12 +489,14 @@ void RegionImplFactory::cleanup()
   {
     assert(ns->second != nullptr);
     // PyNode node specs are destroyed by the C++ PyNode
+#if !defined(NTA_DISABLE_PYTHON)
     if (ns->first.substr(0, 3) == "py.")
     {
       std::string noClass = "";
       pyLib_->destroySpec(ns->first, noClass);
     }
     else
+#endif
     {
       delete ns->second;
     }

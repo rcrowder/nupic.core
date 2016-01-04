@@ -1103,19 +1103,21 @@ void Network::resetProfiling()
     regions_.getByIndex(i).second->resetProfiling();
 }
 
+#if !defined(NTA_DISABLE_PYTHON)
 void Network::registerPyRegion(const std::string module, const std::string className)
 {
   Region::registerPyRegion(module, className);
 }
 
-void Network::registerCPPRegion(const std::string name, GenericRegisteredRegionImpl* wrapper)
-{
-  Region::registerCPPRegion(name, wrapper);
-}
-
 void Network::unregisterPyRegion(const std::string className)
 {
   Region::unregisterPyRegion(className);
+}
+#endif
+
+void Network::registerCPPRegion(const std::string name, GenericRegisteredRegionImpl* wrapper)
+{
+  Region::registerCPPRegion(name, wrapper);
 }
 
 void Network::unregisterCPPRegion(const std::string name)

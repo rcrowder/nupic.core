@@ -82,16 +82,18 @@ namespace nupic
     // nodespec references (e.g. in NuPIC shutdown) or pynodes.
     void cleanup();
 
+#if !defined(NTA_DISABLE_PYTHON)
     static void registerPyRegionPackage(const char * path);
 
     // Allows the user to load custom Python regions
     static void registerPyRegion(const std::string module, const std::string className);
 
-    // Allows the user to load custom C++ regions
-    static void registerCPPRegion(const std::string name, GenericRegisteredRegionImpl * wrapper);
-
     // Allows the user to unregister Python regions
     static void unregisterPyRegion(const std::string className);
+#endif
+
+    // Allows the user to load custom C++ regions
+    static void registerCPPRegion(const std::string name, GenericRegisteredRegionImpl * wrapper);
 
     // Allows the user to unregister C++ regions
     static void unregisterCPPRegion(const std::string name);

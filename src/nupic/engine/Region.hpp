@@ -151,20 +151,22 @@ namespace nupic
     static const Spec*
     getSpecFromType(const std::string& nodeType);
 
+#if !defined(NTA_DISABLE_PYTHON)
     /*
      * Adds a Python module and class to the RegionImplFactory's regions
      */
     static void registerPyRegion(const std::string module, const std::string className);
 
     /*
+    * Removes a Python module and class from the RegionImplFactory's regions
+    */
+    static void unregisterPyRegion(const std::string className);
+#endif
+
+    /*
      * Adds a cpp region to the RegionImplFactory's packages
      */
     static void registerCPPRegion(const std::string name, GenericRegisteredRegionImpl* wrapper);
-
-    /*
-     * Removes a Python module and class from the RegionImplFactory's regions
-     */
-    static void unregisterPyRegion(const std::string className);
 
     /*
      * Removes a cpp region from the RegionImplFactory's packages
