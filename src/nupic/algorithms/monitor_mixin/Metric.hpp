@@ -42,7 +42,7 @@ namespace nupic
   public:
     // A metric computed over a set of data (usually from a `CountsTrace`).
 
-    Instance _monitor;
+    Instance* _monitor;
     string _title;
 
     Real _min, _max;
@@ -57,7 +57,7 @@ namespace nupic
       _title = emptyTitle;
     }
 
-    Metric(Instance& monitor, string& title, TraceType& data);
+    Metric(Instance* monitor, string& title, TraceType& data);
 
     string prettyPrintTitle();
 
@@ -65,28 +65,28 @@ namespace nupic
 
     static Metric<TraceType> createFromTrace(Trace<TraceType>& trace);
     static Metric<TraceType> createFromTrace(Trace<TraceType>& trace, Trace<vector<bool>>& resets);
-    static Metric<TraceType> createFromTrace(Trace<TraceType>& trace, Trace<vector<UInt>>& resets);
+    static Metric<TraceType> createFromTrace(Trace<TraceType>& trace, Trace<vector<Int>>& resets);
 
     static Metric<TraceType> copy(const Metric<TraceType>& rhs);
 
   };
 
-  class MetricsVector : public Metric<vector<UInt>>
+  class MetricsVector : public Metric<vector<Int>>
   {
   public:
     virtual void _computeStats();
 
-    static MetricsVector createFromTrace(Trace<vector<UInt>>& trace);
-    static MetricsVector createFromTrace(Trace<vector<UInt>>& trace, Trace<vector<bool>>& resets);
-    static MetricsVector createFromTrace(Trace<vector<UInt>>& trace, Trace<vector<UInt>>& resets);
+    static MetricsVector createFromTrace(Trace<vector<Int>>& trace);
+    static MetricsVector createFromTrace(Trace<vector<Int>>& trace, Trace<vector<bool>>& resets);
+    static MetricsVector createFromTrace(Trace<vector<Int>>& trace, Trace<vector<Int>>& resets);
 
   };
 
-  class MetricsTrace : public Trace<Metric<UInt>>
+  class MetricsTrace : public Trace<Metric<Int>>
   {
   public:
     // Each entry contains Metrics(for example metric for # of predicted = > active cells).
-    string prettyPrintDatum(Metric<int>& datum);
+    string prettyPrintDatum(Metric<Int>& datum);
 
   };
 

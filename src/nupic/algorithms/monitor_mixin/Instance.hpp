@@ -24,27 +24,26 @@
 * Definitions for an abstract computational interface for modules, such as poolers
 */
 
-#ifndef NTA_instance_HPP
-#define NTA_instance_HPP
+#ifndef NTA_Instance_HPP
+#define NTA_Instance_HPP
 
+#include <string>
 #include <vector>
 #include <nupic/types/Types.hpp>
-
-using namespace std;
-using namespace nupic;
 
 class Instance
 {
 public:
-  string mmName;
+  std::string _name;
   bool _learn;
-  
-  virtual void mmReset() {};
 
-  virtual void mmCompute(vector<UInt> pattern, bool learn) { };
-  virtual void mmCompute(vector<UInt> pattern, bool learn, bool learn2) { };
+  Instance() :
+    _name(""), _learn(false) {};
+
+  virtual void mmReset() = 0;
+  virtual void mmCompute(std::vector<nupic::UInt> pattern, bool learn) = 0;
 };
 
-typedef void ComputeFunction(vector<UInt>& pattern, Instance& instance);
+typedef void ComputeFunction(std::vector<nupic::UInt>& pattern, Instance& instance);
 
-#endif // NTA_instance_HPP
+#endif // NTA_Instance_HPP

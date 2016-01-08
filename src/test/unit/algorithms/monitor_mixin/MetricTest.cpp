@@ -46,10 +46,8 @@ void MetricTest::RunTests()
 
 void MetricTest::setup()
 {
-  trace._monitor = &temp;
+  trace._monitor = temp;
   trace._title = string("# active cells");
-    
-  //trace._data.resize(6);
   trace._data.push_back({ 1, 2, 3, 4, 5, 0 });
 };
 
@@ -70,8 +68,9 @@ void MetricTest::testCreateFromTrace()
 void MetricTest::testCreateFromTraceExcludeResets()
 {
   vector<bool> resetsList({ true,false,false,true,false,false });
+  string resetsTitle = "resets";
 
-  Trace<vector<bool>> resetsTrace = Trace<vector<bool>>(&temp, string("resets"));
+  Trace<vector<bool>> resetsTrace(temp, resetsTitle);
   resetsTrace._data.push_back(resetsList);
 
   MetricsVector metric;

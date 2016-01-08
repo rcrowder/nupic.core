@@ -38,7 +38,8 @@ namespace nupic {
 
   void TraceTest::setUp()
   {
-    _trace = IndicesTrace(NULL, string("active cells"));
+    string indicesTitle = "active cells";
+    _trace = IndicesTrace(NULL, indicesTitle);
     _trace._data.push_back({ 1, 2, 3 });
     _trace._data.push_back({ 4, 5 });
     _trace._data.push_back({ 6 });
@@ -47,22 +48,26 @@ namespace nupic {
 
   void TraceTest::RunTests()
   {
+    setUp();
+
     testMakeCountsTrace();
     testMakeCumCountsTrace();
   }
 
   void TraceTest::testMakeCountsTrace()
   {
-    Trace<vector<UInt>> countsTrace = _trace.makeCountsTrace();
-//    NTA_CHECK(countsTrace._title == string("# active cells"));
-//    NTA_CHECK(countsTrace._data == vector<int>{3, 2, 1, 0});
+    CountsTrace<Int> countsTrace = _trace.makeCountsTrace();
+    NTA_CHECK(countsTrace._title == string("# active cells"));
+    vector<Int> expectedValues = { 3, 2, 1, 0 };
+    NTA_CHECK(countsTrace._data == expectedValues);
   }
 
   void TraceTest::testMakeCumCountsTrace()
   {
-    Trace<vector<UInt>> countsTrace = _trace.makeCumCountsTrace();
-//    NTA_CHECK(countsTrace._title == string("# (cumulative) active cells"));
-//    NTA_CHECK(countsTrace._data == vector<int>{3, 5, 6, 6});
+    CountsTrace<Int> countsTrace = _trace.makeCumulativeCountsTrace();
+    NTA_CHECK(countsTrace._title == string("# (cumulative) active cells"));
+    vector<Int> expectedValues = { 3, 5, 6, 6 };
+    NTA_CHECK(countsTrace._data == expectedValues);
   }
 
 }; // of namespace nupic

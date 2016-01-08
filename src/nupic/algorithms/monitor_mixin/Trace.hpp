@@ -30,6 +30,8 @@
 
 #include "Instance.hpp"
 
+using namespace std;
+
 namespace nupic
 {
   template<typename TraceType>
@@ -47,80 +49,57 @@ namespace nupic
 
     Trace(Instance* monitor, string& title)
       : _monitor(monitor), _title(title) {};
-
-    virtual Trace<TraceType> makeCountsTrace();
-    virtual Trace<TraceType> makeCumCountsTrace();
-
-    string prettyPrintTitle();
-
-    virtual string prettyPrintDatum(TraceType& datum);
   };
 
-  class CountsTrace : public Trace<vector<UInt>>
+  template<typename CountsType>
+  class CountsTrace : public Trace<CountsType>
   {
-  private:
-    static UInt accumulate(Trace<vector<UInt>>& trace);
-
   public:
-    // Each entry contains counts(for example # of predicted = > active cells).
+    // Each entry contains counts (for example # of predicted = > active cells).
     CountsTrace() {};
     CountsTrace(Instance* monitor, string& title)
     {
-      _monitor = monitor;
-      _title = title;
+      this->_monitor = monitor;
+      this->_title = title;
     };
-
-    virtual Trace<vector<UInt>> makeCountsTrace();
-    virtual Trace<vector<UInt>> makeCumCountsTrace();
-
-    virtual string prettyPrintDatum(vector<UInt>& datum);
-
   };
 
-  class IndicesTrace : public CountsTrace
+  class IndicesTrace : public Trace<vector<Int>>
   {
   public:
     IndicesTrace() {};
     IndicesTrace(Instance* monitor, string& title)
     {
-      _monitor = monitor;
-      _title = title;
+      this->_monitor = monitor;
+      this->_title = title;
     };
 
+    virtual CountsTrace<Int> makeCountsTrace();
+    virtual CountsTrace<Int> makeCumulativeCountsTrace();
   };
 
-  class BoolsTrace : public Trace<vector<bool>>
+  class BoolsTrace : public Trace<bool>
   {
   public:
     // Each entry contains bools(for example resets).
     BoolsTrace() {};
     BoolsTrace(Instance* monitor, string& title)
     {
-      _monitor = monitor;
-      _title = title;
+      this->_monitor = monitor;
+      this->_title = title;
     };
-
-    virtual Trace<vector<bool>> makeCountsTrace();
-    virtual Trace<vector<bool>> makeCumCountsTrace();
-
-    string prettyPrintDatum(vector<bool>& datum);
   };
 
-  class StringsTrace : public Trace<vector<string>>
+  class StringsTrace : public Trace<string>
   {
   public:
     // Each entry contains strings(for example sequence labels).
     StringsTrace() {};
     StringsTrace(Instance* monitor, string& title)
     {
-      _monitor = monitor;
-      _title = title;
+      this->_monitor = monitor;
+      this->_title = title;
     };
-
-    virtual Trace<vector<string>> makeCountsTrace();
-    virtual Trace<vector<string>> makeCumCountsTrace();
-
-    string prettyPrintDatum(vector<string>& datum);
   };
 
 }; // of namespace nupic

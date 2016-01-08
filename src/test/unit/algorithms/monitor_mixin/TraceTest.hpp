@@ -51,7 +51,7 @@ namespace nupic {
     virtual void RunTests() override;
 
   private:
-    IndicesTrace  _trace;
+    IndicesTrace _trace;
 
     void setUp();
 

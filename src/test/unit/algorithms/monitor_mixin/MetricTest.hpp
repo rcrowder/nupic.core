@@ -50,8 +50,8 @@ namespace nupic {
     virtual void RunTests() override;
 
   private:
-    Instance temp;
-    Trace<vector<UInt>> trace;
+    Instance* temp;
+    IndicesTrace trace;
 
     void setup();
 
