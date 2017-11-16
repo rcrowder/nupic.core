@@ -1,5 +1,212 @@
 # Changelog
 
+## 1.0.1
+
+* NUP-2481: Update capnp to 0.6.1
+* Don't run iwyu if doing gcc build
+* RES-571 Explicitly declare cmake 3.3 minimum requirement
+
+## 1.0.0
+
+* Convert getProtoType to getSchema to be consistent with Python interface in nupic
+* Add Circle badge to README
+* Make --user optional since manylinux doens't use it
+* Remove build tools setup for Linux CI jobs since new base image already provides these tools
+* NUP-2341: Expose capnp serialization to SVM swig interface
+* NUP-2341: Add missing 'getSchema'
+* update boost to 1.64.0 stable release
+* Add a "checkInputs" param to the TemporalMemory
+
+## 0.7.2
+
+* Add SWIG support for Cells4 capnp serialization
+
+## 0.7.1
+
+* SP optimization using minmax_element (#1326)
+* Add capnp serialization to Cells4, Cell, Segment, SegmentUpdates, CState, etc. (#1346)
+* Fix missing actValue in SDR classifier SWIG interface (#1348)
+
+## 0.7.0
+
+* Give clear exception when clients attempt to reuse ClassifierResult instance with SDRClassifier (PR #1342)
+* Remove FastClaClassifier (PR #1341)
+* Allow SDR classifier to handle multiple category (PR #1339)
+* Add Cap'n Proto serialization to SVM (PR #1338)
+
+## 0.6.3
+
+* Change the Connections to stop doing automatic segment / synapse cleanup
+* Revamp the TemporalMemory proto so that it captures all information
+* For numpy, use a single PyArray_API symbol per binary rather than one per cpp file
+* Use numpy 1.12.1
+* Use pycapnp 0.5.12
+* Use latest pytest 3.0.7, pytest-cov 2.5.0, pytest-xdist 1.16.0
+
+## 0.6.2
+
+* Updated Circle CI configuration and switch to that for OS X builds (instead of Travis CI)
+* Documentation updates: PyRegion
+* IWYU documentation update
+* Fixed C++ boolean ref counting bug that caused segfaults when running Python projects
+* Update pytest and pycapnp dependency versions
+* Implemented byte buffer passing as alternative Python<->C++ strategy for capnp serialization logic. This has some memory/speed overhead but avoids ABI issues that could cause crashes
+* Fixed prototest to get meaningful comparison numbers
+
+## 0.6.1
+
+* Eliminate installation of unnecessary header files when building nupic.bindings. Install Version.hpp unconditionally for the sake of the deployment usage in .travis.yaml
+* Fixed servicing of delayed links such that the circular buffers of all links within a network are refreshed at the end of each time step; and 0-delay links copy data directly from src to dest, bypassing the circular buffer altogether.
+* Add a nNonZerosPerRowOnCols SparseMatrix method
+* Fix up some out of date SWIG interface code
+
+## 0.6.0
+
+* NUP-2366 Remove no-longer-relevent test code
+* NUP-2366 Do not pass arguments in initialize, remove conflicting docstring
+* Add a unit test for mapSegmentsToCells
+* Change segments to UInt32 to speed up the bindings
+* Fix up fetch_remote script to properly poll until the build is complete.
+* Updates to tests moved over from nupic
+* removed shebangs
+* Changed all copyright headers on all files to AGPL.
+* Tests folder refactored
+* Reads version from VERSION for doc output
+* Fixing travis-ci unit tests
+* Doxygen only creates XML, used by Breathe to create docs.
+
+## 0.5.3
+
+* Added comment explaining the nuance of the static variables in Cells4::adaptSegment
+* Improved explanation of containers in Cells4::adaptSegment implementation.
+* Regenerate SWIG bindings C++ files if any headers change.
+* Enable -D_LIBCPP_DEBUG=0 for debug-lite in Clang builds (e.g., OS X). NOTE: Clan't debug mode is not mature, and anything above level 0 appears to require debug build of libc++ during linking, which it not present by default on OS X.
+* Fixed deletion of wrong synapses and index-out-of-bounds in Cells4::adaptSegment/Segment::freeNSynapses.
+* corrected typo in CHANGELOG.md (boostingStrength -> boostStrength)
+* Remove ExtendedTemporalMemory proto
+* Fix bug in unit test, make TM catch this bug in DEBUG builds
+* Perf: Densify prevActiveCells rather than binary searching
+* Get POC of OS X build on circle.ci up and running.
+* Bump version to prerelease.
+
+
+## 0.5.1
+
+* Improved network API introspection
+* Fix bug with region dimensions inference in network API. fixes #1212
+* Updates to info in RELEASE.md
+* Fixup import favoring native unittest
+* Use xcode6.4 image per documentation at https://docs.travis-ci.com/user/osx-ci-environment/#OS-X-Version
+* NUP-2316 Fixed OS X build failure on xcode 8 caused by included some files in static library that shouldn't have been included.
+* Misc. changes for sparse matrices and using them in Connections. Moving loops to C++.
+
+## 0.5.0
+
+* Link: Implemented delayed links. NOTE: this is not backwards compatible with CLAModel class, so Nupic will be updated as well.
+* SparseMatrix: Stop copying input vectors
+* Drop the declare_namespace call - Issue #1072
+* SparseMatrix: Add option to specify rows in nNonZerosPerRow
+* SparseMatrix: setRandomZerosOnOuter with list of counts
+* SparseMatrix: rightVecSumAtNZ cleanup
+* SparseMatrix: Put cols in dense array even when not necessary
+* Removes experimental code that will now live in nupic.research.core.
+* Removed unused, obsolete NetworkFactory class.
+
+## 0.4.16
+
+* SpatialPooler: Stop rounding the boost factors
+* SpatialPooler: Rename "maxBoost" to "boostStrength"
+* SpatialPooler: Remove minActiveDutyCycles and minPctActiveDutyCycles from spatial pooler
+
+## 0.4.15
+
+* SpatialPooler: Tweak the boost factor rounding to mimic numpy's rounding of float32s
+
+## 0.4.14
+
+* SpatialPooler: New boosting algorithm
+* SpatialPooler: Stop putting tie-break info into the overlaps. `getBoostedOverlaps()` return values are now more correct.
+* SpatialPooler: Use an EPSILON when comparing permanences to a threshold to avoid floating point differences.
+* SpatialPooler: Round the boost factors to two decimal places to avoid floating point differences.
+
+## 0.4.13
+
+* Use VERSION file when generating docs.
+* 64-bit gcc on Windows build error
+* New: setZerosOnOuter, increaseRowNonZeroCountsOnOuterTo
+* Remove a nupic.math test that should stay in nupic
+* Use unittest, not unittest2, to match the nupic.core CI config
+* Add C++ unit tests for the new SparseMatrix methods
+* Finish moving nupic.bindings math tests to nupic.core
+* s/AboveAndBelow/BelowAndAbove
+* Moves some tests for SWIG bindings from nupic to nupic.core
+* Better method names: s/AboveAndBelow/BelowAndAbove
+* Four new SparseMatrix methods, enabling batch synapse learning
+* Expose the nrows,ncols SparseBinaryMatrix ctor in the bindings
+
+## 0.4.12
+
+* Updated to numpy 1.11.2 everywhere.
+* Initialize timer variable in 'Regioncpp' file
+
+## 0.4.11
+
+* Botched release, unavailable.
+
+## 0.4.10
+
+* Removes version as part of iterative artifact name
+* Deleted linux ci scripts for travis.
+* Removed calls to linux ci scripts, forced platform=darwin
+* Remove gcc builds from matrix.
+* Using image w/ same version of xcode as last passing master build
+* Remove some executables from test list that we don't want to run every build.
+* Complete test coverage for region registration.
+* Reduce build times by removing some executables from build.
+* Update py_region_test for new behavior and make sure the test is run in CI.
+* Fixes #1108 by only throwing exception when registering region with class name that is already registered if the new region is from a different module than the original.
+* Remove unused vagrant configuration
+* Remove default values for vectors because GCC can't handle it
+* gcc error: checking whether a UInt is positive
+* "depolarizeCells", "reinforceCandidates", "growthCandidates"
+
+## 0.4.9
+
+* Obey wrapAround paramater for columns, not just inputs
+* Make sure exceptions are properly exposed when parsing dataType in region spec.
+* Network API: allow Bools to be used as creation params
+* DEVOPS-157 Remove now-unused RESULT_KEY env var from the build-and-test-nupic-bindings.sh interface.
+* Handle new synapsesForSegment behavior in Connections perf test
+
+## 0.4.8
+
+* Add missing argument to `Set-PsDebug -Trace`
+* Issue1075 fix py_region_test failure on windows (#1082)
+* Perf: Walk neighborhoods via iterators.
+
+## 0.4.7
+
+* Check that TM input is sorted indices in Release builds
+* Update inhibition comments and docstrings.
+* Use C arrays in TemporalMemory. Allows numpy array reuse.
+* Added that `-DNUPIC_BUILD_PYEXT_MODULES=ON` is the default at this time.
+* Added information about usage of the NUPIC_BUILD_PYEXT_MODULES cmake property.
+* Describe flatIdx in Connections docstring
+* Consistent param ordering between implementations.
+* Store "numActivePotentialSynapses". No more "SegmentOverlap".
+
+## 0.4.6
+
+* Templates: Stop inferring const unnecessarily
+* Build error sometimes in clang -- need copy constructor
+* Check that minThreshold <= activationThreshold
+* Split compute into activateCells and activateDendrites
+* TM and ETM cleanup
+* ETM: Grow synapses on active segments, not just matching segments
+* Removal of MSVC TP compilation flag
+* Also do the learnOnOneCell serializaton check in ::save
+* Implement learnOnOneCell in the ETM
+
 ## 0.4.5
 
 * Removed no longer used pre-built Swig executables for various flavors of Linux; nupic.core automatically builds Swig from embedded sources on non-Windows platforms.

@@ -240,7 +240,7 @@ set(allow_link_with_undefined_symbols_flags "")
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   # MS Visual C
-  set(shared_compile_flags "${shared_compile_flags} /TP /Zc:wchar_t /Gm- /fp:precise /errorReport:prompt /W1 /WX- /GR /Gd /GS /Oy- /EHs /analyze- /nologo")
+  set(shared_compile_flags "${shared_compile_flags} /Zc:wchar_t /Gm- /fp:precise /errorReport:prompt /W1 /WX- /GR /Gd /GS /Oy- /EHs /analyze- /nologo")
   set(shared_linker_flags_unoptimized "${shared_linker_flags_unoptimized} /NOLOGO /SAFESEH:NO /NODEFAULTLIB:LIBCMT")
   if("${BITNESS}" STREQUAL "32")
     set(shared_linker_flags_unoptimized "${shared_linker_flags_unoptimized} /MACHINE:X86")
@@ -345,6 +345,10 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     # to examine containers in gdb.
     # See https://gcc.gnu.org/onlinedocs/libstdc++/manual/debug_mode_using.html
     list(APPEND COMMON_COMPILER_DEFINITIONS -D_GLIBCXX_DEBUG)
+  elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+    # NOTE: debug mode is immature in Clang, and values of _LIBCPP_DEBUG above 0
+    # require  the debug build of libc++ to be present at linktime on OS X.
+    list(APPEND COMMON_COMPILER_DEFINITIONS -D_LIBCPP_DEBUG=0)
   endif()
 
   # Disable optimizations
